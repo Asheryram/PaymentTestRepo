@@ -1,0 +1,98 @@
+# 🌐 Global Variables (use {{variableName}}) to avoid repetition
+@baseUrl = http://localhost:5000/api/payments
+@contentType = application/json
+@userEmail = ashertettehabotsi@gmail.com
+@businessEmail = ashertettehabotsi@gmail.com
+
+GT Bank code
+@bankCode = 230100
+@accountNumber = 3021392381700
+@phoneNumber = 233537159746
+@reference = momo_ref_123456789
+
+###
+# ------------------------------------------------------------
+# 🏦 Step 1️⃣: Create Business Account & Subaccount
+# ------------------------------------------------------------
+# When a new business registers, create an account for them and link it to a Paystack subaccount.
+POST {{baseUrl}}/subaccount
+Content-Type: {{contentType}}
+
+{
+  "business_name": "Awesome Business",
+  "business_email": "{{businessEmail}}",
+  "bank_code": "{{bankCode}}",
+  "account_number": "{{accountNumber}}"
+}
+
+###
+# ------------------------------------------------------------
+# 🛒 Step 2️⃣: User Initiates Mobile Money Payment (MoMo)
+# ------------------------------------------------------------
+# The mobile user selects items and pays via mobile money.
+POST {{baseUrl}}/momo-payment
+Content-Type: {{contentType}}
+
+{
+  "email": "{{userEmail}}",
+  "amount": 3,
+  "phone": "{{phoneNumber}}",
+  "provider": "mtn",
+  "subaccount": "ACCT_8l6qsm6e6xjudjq"
+}
+
+
+
+
+###
+# ------------------------------------------------------------
+# 📦 Step 3️⃣: Receive Payment Confirmation (Webhook)
+# ------------------------------------------------------------
+# This webhook is triggered by Paystack when the user's payment is confirmed.
+POST {{baseUrl}}/webhook
+Content-Type: {{contentType}}
+
+{
+  "event": "charge.success",
+  "data": {
+    "reference": "{{reference}}",
+    "status": "success"
+  }
+}
+
+###
+# ------------------------------------------------------------
+# 🔍 Step 4️⃣: Check Status of Payment (Optional Verification)
+# ------------------------------------------------------------
+# After the webhook is received, we can verify the status of a specific payment.
+GET {{baseUrl}}/transaction-status?reference={{reference}}
+
+###
+# ------------------------------------------------------------
+# 📋 Step 5️⃣: View User Transaction History
+# ------------------------------------------------------------
+# The user can see their full transaction history.
+GET {{baseUrl}}/transactions?email={{userEmail}}
+
+###
+# ------------------------------------------------------------
+# 💸 Step 6️⃣: Business Requests Withdrawal
+# ------------------------------------------------------------
+# The business can request funds to be sent to their bank account.
+POST {{baseUrl}}/withdrawal
+Content-Type: {{contentType}}
+
+{
+  "email": "{{businessEmail}}",
+  "amount": 1,
+  "bank_code": "{{bankCode}}",
+  "account_number": "{{accountNumber}}"
+}
+
+###
+# ------------------------------------------------------------
+# 💰 Step 7️⃣: Admin Checks Ecentials Account Balance
+# ------------------------------------------------------------
+# The admin can view the total balance of Ecentials' Paystack account.
+
+GET {{baseUrl}}/balance
